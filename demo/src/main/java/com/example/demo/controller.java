@@ -55,7 +55,7 @@ public class controller {
     }
 
     @GetMapping(value = "/user")
-    public @ResponseBody Optional<User> findUser(@RequestParam int id, @RequestParam String token) {
+    public @ResponseBody Optional<User> findUser(@RequestParam int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
@@ -67,7 +67,7 @@ public class controller {
     }
 
     @PostMapping(value = "/item")
-    public Item createItem(@RequestBody Item newItem, @RequestParam String token) {
+    public Item createItem(@RequestBody Item newItem, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
@@ -86,7 +86,7 @@ public class controller {
     }
 
     @GetMapping(value = "/item")
-    public @ResponseBody Optional<Item> findItem(@RequestParam int id, @RequestParam String token) {
+    public @ResponseBody Optional<Item> findItem(@RequestParam int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
@@ -97,7 +97,7 @@ public class controller {
         }
     }
     @GetMapping(value = "/deleteUser")
-    public Boolean deleteUser(@RequestParam int id, @RequestParam String token) {
+    public Boolean deleteUser(@RequestParam int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
@@ -160,7 +160,7 @@ public class controller {
     }
 
     @GetMapping(value = "/deleteItem")
-    public Boolean deleteItem(@RequestParam int id, @RequestParam String token) {
+    public Boolean deleteItem(@RequestParam int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
@@ -178,7 +178,7 @@ public class controller {
         }
     }
     @GetMapping(value="/allItems")
-    public @ResponseBody Iterable<Item> getAllItems(@RequestParam String token) {
+    public @ResponseBody Iterable<Item> getAllItems(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
