@@ -45,12 +45,11 @@ public class Item {
 
     }
 
-    public Item (String name, String description, String imageURL, float price, int userID) {
+    public Item (String name, String description, String imageURL, float price) {
         setName(name);
         setDescription(description);
         setImageURL(imageURL);
         setPrice(price);
-        setSeller(userID);
     }
 
     public String getDescription() {

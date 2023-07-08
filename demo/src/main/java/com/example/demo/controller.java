@@ -54,6 +54,25 @@ public class controller {
         }
     }
 
+    @PutMapping(value = "/user")
+    public boolean updateUser(@RequestBody int ID, @RequestBody User user, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET_KEY.getBytes())
+                    .parseClaimsJws(token).getBody();
+            User newUser = userRepository.findById(ID);
+            newUser.setName(user.getName());
+            newUser.setPassword(user.getPassword());
+            newItem.setIsSeller(user.getIsSeller());
+            userRepository.save(newUser);
+            return true;
+        } catch (ResponseStatusException e){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU DO NOT HAVE PERMISSION TO MAKE THIS CALL");
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
+        }
+    }
+
     @GetMapping(value = "/user")
     public @ResponseBody Optional<User> findUser(@RequestParam int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
@@ -73,8 +92,36 @@ public class controller {
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token).getBody();
             if (claims.getSubject().equals("Admin")) {
+                newItem.setSeller(claims.getIssuer());
                 itemRepository.save(newItem);
+                User newUser = userRepository.findById(claims.getIssuer());
+                newUser.setNewItem(true);
+                userRepository.save(newUser);
                 return newItem;
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU DO NOT HAVE PERMISSION TO MAKE THIS CALL");
+            }
+        } catch (ResponseStatusException e){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU DO NOT HAVE PERMISSION TO MAKE THIS CALL");
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
+        }
+    }
+
+    @PutMapping(value = "/item")
+    public boolean updateItem(@RequestBody int ID, @RequestBody Item item, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET_KEY.getBytes())
+                    .parseClaimsJws(token).getBody();
+            if (claims.getSubject().equals("Admin")) {
+                Item newItem = itemRepository.findById(ID);
+                newItem.setName(item.getName());
+                newItem.setDescription(item.getDescription());
+                newItem.setImageURL(item.getImageURL());
+                newItem.setPrice(item.getPrice());
+                itemRepository.save(newItem);
+                return true;
             } else {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU DO NOT HAVE PERMISSION TO MAKE THIS CALL");
             }
@@ -91,7 +138,11 @@ public class controller {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token).getBody();
-            return itemRepository.findById(id);
+            Item newItem = itemRepository.findById(id);
+            User newUser = user.findById(newItem.getSeller());
+            newUser.setNewItem(false);
+            userRepository.save(newUser);
+            return newItem
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
         }
@@ -151,7 +202,7 @@ public class controller {
             JwtBuilder builder = Jwts.builder().setId(actualUser.getId().toString())
                     .setSubject(adminString)
                     .setExpiration(new Date(System.currentTimeMillis() + 3600 * 1000))
-                    .setIssuer(actualUser.getName())
+                    .setIssuer(actualUser.getId())
                     .signWith(signatureAlgorithm, SECRET_KEY.getBytes());
             return builder.compact();
         } else {
@@ -183,6 +234,17 @@ public class controller {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token).getBody();
+            Iterable<User> userList = userRepository.findAll();
+            Iterator<User> userIterator = userList.iterator();
+            boolean auth = false;
+            User actualUser = new User();
+            while(userIterator.hasNext()) {
+                User u = userIterator.next();
+                if (u.getNewItem()) {
+                    u.setNewItem(false);
+                    userRepository.save(u);
+                }
+            }
             return itemRepository.findAll();
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");

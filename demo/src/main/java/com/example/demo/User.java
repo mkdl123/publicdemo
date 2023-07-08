@@ -23,6 +23,16 @@ public class User {
     }
 
     private boolean isSeller;
+
+    public boolean getNewItem() {
+        return newItem;
+    }
+
+    public void setNewItem(boolean newItem) {
+        this.newItem = newItem;
+    }
+
+    private boolean newItem;
     public User() {
 
     }
@@ -30,6 +40,7 @@ public class User {
         this.name = name;
         this.password = password;
         this.isSeller = isSeller;
+        this.newItem = false;
     }
     public void setPassword(String password) {
         this.password = password;
