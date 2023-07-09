@@ -139,9 +139,6 @@ public class controller {
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token).getBody();
             Item newItem = itemRepository.findById(id);
-            User newUser = user.findById(newItem.getSeller());
-            newUser.setNewItem(false);
-            userRepository.save(newUser);
             return newItem
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
