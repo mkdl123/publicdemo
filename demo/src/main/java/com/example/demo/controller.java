@@ -60,10 +60,10 @@ public class controller {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token).getBody();
-            User newUser = userRepository.findById(ID);
+            User newUser = userRepository.findById(ID).get();
             newUser.setName(user.getName());
             newUser.setPassword(user.getPassword());
-            newItem.setIsSeller(user.getIsSeller());
+            newUser.setIsSeller(user.getIsSeller());
             userRepository.save(newUser);
             return true;
         } catch (ResponseStatusException e){
@@ -92,9 +92,10 @@ public class controller {
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token).getBody();
             if (claims.getSubject().equals("Admin")) {
-                newItem.setSeller(claims.getIssuer());
+                int sellerId = Integer.parseInt(claims.getIssuer());
+                newItem.setSeller(sellerId);
                 itemRepository.save(newItem);
-                User newUser = userRepository.findById(claims.getIssuer());
+                User newUser = userRepository.findById(sellerId).get();
                 newUser.setNewItem(true);
                 userRepository.save(newUser);
                 return newItem;
@@ -115,7 +116,7 @@ public class controller {
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token).getBody();
             if (claims.getSubject().equals("Admin")) {
-                Item newItem = itemRepository.findById(ID);
+                Item newItem = itemRepository.findById(ID).get();
                 newItem.setName(item.getName());
                 newItem.setDescription(item.getDescription());
                 newItem.setImageURL(item.getImageURL());
@@ -138,8 +139,7 @@ public class controller {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token).getBody();
-            Item newItem = itemRepository.findById(id);
-            return newItem
+            return itemRepository.findById(id);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
         }
@@ -199,7 +199,7 @@ public class controller {
             JwtBuilder builder = Jwts.builder().setId(actualUser.getId().toString())
                     .setSubject(adminString)
                     .setExpiration(new Date(System.currentTimeMillis() + 3600 * 1000))
-                    .setIssuer(actualUser.getId())
+                    .setIssuer(actualUser.getId().toString())
                     .signWith(signatureAlgorithm, SECRET_KEY.getBytes());
             return builder.compact();
         } else {
