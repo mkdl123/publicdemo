@@ -139,6 +139,7 @@ public class controller {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token.split(" ")[1]).getBody();
+
             return itemRepository.findById(id);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
