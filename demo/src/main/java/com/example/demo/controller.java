@@ -59,7 +59,7 @@ public class controller {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(token).getBody();
+                    .parseClaimsJws(token.split(" ")[1]).getBody();
             User newUser = userRepository.findById(ID).get();
             newUser.setName(user.getName());
             newUser.setPassword(user.getPassword());
@@ -78,7 +78,7 @@ public class controller {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(token).getBody();
+                    .parseClaimsJws(token.split(" ")[1]).getBody();
             return userRepository.findById(id);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
@@ -90,7 +90,7 @@ public class controller {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(token).getBody();
+                    .parseClaimsJws(token.split(" ")[1]).getBody();
             if (claims.getSubject().equals("Admin")) {
                 int sellerId = Integer.parseInt(claims.getIssuer());
                 newItem.setSeller(sellerId);
@@ -110,11 +110,11 @@ public class controller {
     }
 
     @PutMapping(value = "/item")
-    public boolean updateItem(@RequestBody int ID, @RequestBody Item item, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+    public boolean updateItem(@RequestParam int ID, @RequestBody Item item, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(token).getBody();
+                    .parseClaimsJws(token.split(" ")[1]).getBody();
             if (claims.getSubject().equals("Admin")) {
                 Item newItem = itemRepository.findById(ID).get();
                 newItem.setName(item.getName());
@@ -138,7 +138,7 @@ public class controller {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(token).getBody();
+                    .parseClaimsJws(token.split(" ")[1]).getBody();
             return itemRepository.findById(id);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
@@ -149,7 +149,7 @@ public class controller {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(token).getBody();
+                    .parseClaimsJws(token.split(" ")[1]).getBody();
             if (claims.getSubject().equals("Admin")) {
                 userRepository.deleteById(id);
                 return true;
@@ -212,7 +212,7 @@ public class controller {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(token).getBody();
+                    .parseClaimsJws(token.split(" ")[1]).getBody();
             if (claims.getSubject().equals("Admin")) {
                 itemRepository.deleteById(id);
                 return true;
@@ -230,11 +230,10 @@ public class controller {
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(token).getBody();
+                    .parseClaimsJws(token.split(" ")[1]).getBody();
             Iterable<User> userList = userRepository.findAll();
             Iterator<User> userIterator = userList.iterator();
             boolean auth = false;
-            User actualUser = new User();
             while(userIterator.hasNext()) {
                 User u = userIterator.next();
                 if (u.getNewItem()) {
@@ -244,7 +243,7 @@ public class controller {
             }
             return itemRepository.findAll();
         } catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID OR EXPIRED TOKEN");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 }
