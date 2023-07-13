@@ -204,10 +204,9 @@ public class controller {
                     .signWith(signatureAlgorithm, SECRET_KEY.getBytes());
             return builder.compact();
         } else {
-            return "false";
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Provided credentials do not match any existing records.");
         }
     }
-
     @GetMapping(value = "/deleteItem")
     public Boolean deleteItem(@RequestParam int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
